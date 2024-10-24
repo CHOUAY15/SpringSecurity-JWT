@@ -11,4 +11,5 @@ public class DoctorDto extends PersonDto {
     private String address;
     private Integer yearsExperience;
     private String biography;
+    private String image;
 }

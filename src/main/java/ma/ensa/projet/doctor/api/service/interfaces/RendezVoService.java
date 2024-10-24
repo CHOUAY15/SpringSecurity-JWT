@@ -7,17 +7,17 @@ import ma.ensa.projet.doctor.api.entity.RendezVous;
 
 public interface RendezVoService {
 
-    RendezVous createRendezVous(RendezVousDTO rendezVousDTO);
+    RendezVousDTO createRendezVous(RendezVousDTO rendezVousDTO);
 
     void deleteRendezVous(Integer rendezVousId);
 
-    RendezVous updateRendezVous(Integer rendezVousId, RendezVousDTO rendezVousDTO);
+    RendezVousDTO updateRendezVous(Integer rendezVousId, RendezVousDTO rendezVousDTO);
 
-    List<RendezVous> getAllRendezVous();
+    List<RendezVousDTO> getAllRendezVous();
 
-    List<RendezVous> getRendezVousByPatientId(Integer patId);
+    List<RendezVousDTO> getRendezVousByPatientId(Integer patId);
 
-    List<RendezVous> getRendezVousByDoctorId(Integer docId);
+    List<RendezVousDTO> getRendezVousByDoctorId(Integer docId);
 
 
 

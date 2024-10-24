@@ -85,6 +85,7 @@ public class UserServiceImpl implements UserService {
             Patient patient = patientRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
             PatientDto patientDto=new PatientDto();
+            patientDto.setId(patient.getId());
             patientDto.setFirstName(patient.getFirstName());    
             patientDto.setLastName(patient.getLastName());  
             patientDto.setPhoneNumber(patient.getPhoneNumber());  
@@ -98,6 +99,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
             
                 DoctorDto doctorDto=new DoctorDto();
+                doctorDto.setId(doctor.getId());
                 doctorDto.setFirstName(doctor.getFirstName());
                 doctorDto.setLastName(doctor.getLastName());
                 doctorDto.setAddress(doctor.getAddress());

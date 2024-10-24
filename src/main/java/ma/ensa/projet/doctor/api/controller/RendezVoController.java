@@ -1,13 +1,13 @@
 package ma.ensa.projet.doctor.api.controller;
 
 import ma.ensa.projet.doctor.api.dto.RendezVousDTO;
-import ma.ensa.projet.doctor.api.entity.RendezVous;
 import ma.ensa.projet.doctor.api.service.interfaces.RendezVoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -20,19 +20,17 @@ public class RendezVoController {
     private RendezVoService rendezVousService;
 
     @PostMapping
-    public ResponseEntity<RendezVous> createRendezVous(@Valid @RequestBody RendezVousDTO rendezVousDTO) {
-        try {
-            RendezVous newRendezVous = rendezVousService.createRendezVous(rendezVousDTO);
-            return new ResponseEntity<>(newRendezVous, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<RendezVousDTO> createRendezVous(@Valid @RequestBody RendezVousDTO rendezVousDTO) {
+        RendezVousDTO newRendezVous = rendezVousService.createRendezVous(rendezVousDTO);
+        return new ResponseEntity<>(newRendezVous, HttpStatus.CREATED);
     }
+    
+
 
     @GetMapping
-    public ResponseEntity<List<RendezVous>> getAllRendezVous() {
+    public ResponseEntity<List<RendezVousDTO>> getAllRendezVous() {
         try {
-            List<RendezVous> rendezVousList = rendezVousService.getAllRendezVous();
+            List<RendezVousDTO> rendezVousList = rendezVousService.getAllRendezVous();
             if (rendezVousList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -43,9 +41,9 @@ public class RendezVoController {
     }
 
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<RendezVous>> getRendezVousByPatient(@PathVariable Integer patientId) {
+    public ResponseEntity<List<RendezVousDTO>> getRendezVousByPatient(@PathVariable Integer patientId) {
         try {
-            List<RendezVous> rendezVousList = rendezVousService.getRendezVousByPatientId(patientId);
+            List<RendezVousDTO> rendezVousList = rendezVousService.getRendezVousByPatientId(patientId);
             if (rendezVousList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -56,9 +54,9 @@ public class RendezVoController {
     }
 
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<RendezVous>> getRendezVousByDoctor(@PathVariable Integer doctorId) {
+    public ResponseEntity<List<RendezVousDTO>> getRendezVousByDoctor(@PathVariable Integer doctorId) {
         try {
-            List<RendezVous> rendezVousList = rendezVousService.getRendezVousByDoctorId(doctorId);
+            List<RendezVousDTO> rendezVousList = rendezVousService.getRendezVousByDoctorId(doctorId);
             if (rendezVousList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -69,11 +67,11 @@ public class RendezVoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RendezVous> updateRendezVous(
+    public ResponseEntity<RendezVousDTO> updateRendezVous(
             @PathVariable Integer id,
             @Valid @RequestBody RendezVousDTO rendezVousDTO) {
         try {
-            RendezVous updatedRendezVous = rendezVousService.updateRendezVous(id, rendezVousDTO);
+            RendezVousDTO updatedRendezVous = rendezVousService.updateRendezVous(id, rendezVousDTO);
             return new ResponseEntity<>(updatedRendezVous, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

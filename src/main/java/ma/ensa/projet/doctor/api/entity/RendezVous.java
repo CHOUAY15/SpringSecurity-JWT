@@ -15,7 +15,7 @@ public class RendezVous {
 
 
     @Temporal(TemporalType.TIMESTAMP)  
-    @Column(name = "date_rendezvous", nullable = false)
+    @Column(name = "date_rendezvous", nullable = false,unique = true)
     private Date date;
 
     @ManyToOne

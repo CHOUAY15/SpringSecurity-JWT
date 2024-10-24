@@ -9,6 +9,7 @@ import java.util.Date;
 public class RendezVousDTO {
 
     @NotNull(message = "Date cannot be null")
+    
     private Date date;
 
     @NotNull(message = "Patient ID cannot be null")
@@ -18,6 +19,8 @@ public class RendezVousDTO {
     private Integer doctorId;
 
     private boolean statut;
+    private String ptienName;
+    private String doctorName;
 
 
 

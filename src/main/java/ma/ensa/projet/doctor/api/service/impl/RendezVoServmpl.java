@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RendezVoServmpl implements RendezVoService {
@@ -27,23 +28,30 @@ public class RendezVoServmpl implements RendezVoService {
     private DoctorRepo doctorRepository;
 
     @Override
-    public RendezVous createRendezVous(RendezVousDTO rendezVousDTO) {
+    public RendezVousDTO createRendezVous(RendezVousDTO rendezVousDTO) {
         // Find patient and doctor
         Patient patient = patientRepository.findById(rendezVousDTO.getPatientId())
             .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
-        
+    
         Doctor doctor = doctorRepository.findById(rendezVousDTO.getDoctorId())
             .orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
-
+    
+        // Check if a RendezVous with the same date already exists
+        boolean exists = rendezVousRepository.existsByDate(rendezVousDTO.getDate());
+        if (exists) {
+            throw new IllegalArgumentException("Impossible de créer RendezVous : la date existe déjà");
+        }
+    
         // Create new RendezVous
         RendezVous rendezVous = new RendezVous();
         rendezVous.setDate(rendezVousDTO.getDate());
         rendezVous.setPatient(patient);
         rendezVous.setDoctor(doctor);
     
-
-        return rendezVousRepository.save(rendezVous);
+        // Save and convert to DTO
+        return convertToDto(rendezVousRepository.save(rendezVous));
     }
+    
 
     @Override
     public void deleteRendezVous(Integer rendezVousId) {
@@ -54,42 +62,48 @@ public class RendezVoServmpl implements RendezVoService {
     }
 
     @Override
-    public RendezVous updateRendezVous(Integer rendezVousId, RendezVousDTO rendezVousDTO) {
+    public RendezVousDTO updateRendezVous(Integer rendezVousId, RendezVousDTO rendezVousDTO) {
         RendezVous existingRendezVous = rendezVousRepository.findById(rendezVousId)
             .orElseThrow(() -> new EntityNotFoundException("RendezVous not found"));
-
-        // // Find patient and doctor if IDs are different
-        // if (!existingRendezVous.getPatient().getId().equals(rendezVousDTO.getPatientId())) {
-        //     Patient patient = patientRepository.findById(rendezVousDTO.getPatientId())
-        //         .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
-        //     existingRendezVous.setPatient(patient);
-        // }
-
-        // if (!existingRendezVous.getDoctor().getId().equals(rendezVousDTO.getDoctorId())) {
-        //     Doctor doctor = doctorRepository.findById(rendezVousDTO.getDoctorId())
-        //         .orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
-        //     existingRendezVous.setDoctor(doctor);
-        // }
 
         // Update other fields
         existingRendezVous.setDate(rendezVousDTO.getDate());
         existingRendezVous.setStatus(rendezVousDTO.isStatut());
 
-        return rendezVousRepository.save(existingRendezVous);
+        // Save and convert to DTO
+        return convertToDto(rendezVousRepository.save(existingRendezVous));
     }
 
     @Override
-    public List<RendezVous> getAllRendezVous() {
-        return rendezVousRepository.findAll();
+    public List<RendezVousDTO> getAllRendezVous() {
+        return rendezVousRepository.findAll().stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<RendezVous> getRendezVousByPatientId(Integer patId) {
-        return rendezVousRepository.findByPatientId(patId);
+    public List<RendezVousDTO> getRendezVousByPatientId(Integer patId) {
+        return rendezVousRepository.findByPatientId(patId).stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<RendezVous> getRendezVousByDoctorId(Integer docId) {
-        return rendezVousRepository.findByDoctorId(docId);
+    public List<RendezVousDTO> getRendezVousByDoctorId(Integer docId) {
+        return rendezVousRepository.findByDoctorId(docId).stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+    }
+
+    // Convert entity to DTO
+    private RendezVousDTO convertToDto(RendezVous rendezVous) {
+        RendezVousDTO dto = new RendezVousDTO();
+        dto.setDoctorName(rendezVous.getDoctor().getLastName()+" "+rendezVous.getDoctor().getFirstName());
+        dto.setPtienName(rendezVous.getPatient().getLastName()+" "+rendezVous.getPatient().getFirstName());
+        dto.setDate(rendezVous.getDate());
+        dto.setPatientId(rendezVous.getPatient().getId());
+        dto.setDoctorId(rendezVous.getDoctor().getId());
+        dto.setStatut(rendezVous.isStatus());
+        return dto;
     }
 }

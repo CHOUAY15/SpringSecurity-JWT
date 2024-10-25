@@ -1,13 +1,20 @@
 package ma.ensa.projet.doctor.api.controller;
 
 import ma.ensa.projet.doctor.api.dto.DoctorDto;
+import ma.ensa.projet.doctor.api.entity.Doctor;
+import ma.ensa.projet.doctor.api.service.impl.FileStorageService;
 import ma.ensa.projet.doctor.api.service.interfaces.DoctorService;
+import ma.ensa.projet.doctor.api.service.interfaces.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -19,6 +26,12 @@ public class DoctorController {
 
     @Autowired
     private  DoctorService doctorService;
+    
+    @Autowired
+     private UserService userService;
+    
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @GetMapping
     public ResponseEntity<List<DoctorDto>> getAllDoctors() {
@@ -37,5 +50,54 @@ public class DoctorController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(doctors);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DoctorDto> update(
+            @PathVariable Integer id,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("specialty") String specialty,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam("address") String address,
+            @RequestParam("yearsExperience") int yearsExperience,
+            @RequestParam("biography") String biography) {
+
+        try {
+            // Find the existing doctor by ID
+            Doctor existingDoctor = doctorService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + id));
+
+            // Update fields
+            DoctorDto doctorDto = new DoctorDto();
+            doctorDto.setId(id); // Set the ID to update
+            doctorDto.setFirstName(firstName);
+            doctorDto.setLastName(lastName);
+            doctorDto.setSpecialty(specialty);
+            doctorDto.setAddress(address);
+            doctorDto.setYearsExperience(yearsExperience);
+            doctorDto.setBiography(biography);
+         
+      
+
+            if (image != null && !image.isEmpty()) {
+                // Delete old image if exists
+                if (existingDoctor.getImage() != null) {
+                    fileStorageService.deleteFile(existingDoctor.getImage());
+                }
+                // Store new image
+                String fileName = fileStorageService.storeFile(image);
+                doctorDto.setImage(fileName);
+            }
+
+            // Update the doctor using the service
+            DoctorDto updatedDoctorDto = userService.updateDoctor(id, doctorDto);
+
+            return new ResponseEntity<>(updatedDoctorDto, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

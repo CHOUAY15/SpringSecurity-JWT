@@ -15,6 +15,6 @@ public interface UserService {
     UserEntity getUserByEmail(String email);
     PersonDto getPersonDto(UserEntity user);
     AuthResponseDTO buildAuthResponse(String token, PersonDto personDto,Integer role);
-    PatientDto updatePatient(PatientDto patientDto);
-    DoctorDto updateDoctor(PatientDto patientDto);
+    PatientDto updatePatient(Integer id,PatientDto patientDto);
+    DoctorDto updateDoctor(Integer id,DoctorDto patientDto);
 }

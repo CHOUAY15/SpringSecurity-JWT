@@ -8,6 +8,7 @@ import ma.ensa.projet.doctor.api.service.interfaces.DoctorService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,5 +44,9 @@ public class DoctorServiceImpl implements DoctorService {
         doctorDto.setBiography(doctor.getBiography());
         doctorDto.setImage(doctor.getImage());
         return doctorDto;
+    }
+    
+    public Optional<Doctor> findById(Integer id) {
+        return doctorRepo.findById(id);
     }
 }

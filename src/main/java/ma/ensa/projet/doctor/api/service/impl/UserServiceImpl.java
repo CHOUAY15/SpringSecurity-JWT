@@ -122,4 +122,16 @@ public class UserServiceImpl implements UserService {
             personDto,role
         );
     }
+
+    @Override
+    public PatientDto updatePatient(PatientDto patientDto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updatePatient'");
+    }
+
+    @Override
+    public DoctorDto updateDoctor(PatientDto patientDto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateDoctor'");
+    }
 }

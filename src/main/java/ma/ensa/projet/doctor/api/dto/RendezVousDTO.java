@@ -7,6 +7,7 @@ import java.util.Date;
 
 @Data
 public class RendezVousDTO {
+    private Integer id;
 
     @NotNull(message = "Date cannot be null")
     

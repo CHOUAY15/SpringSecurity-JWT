@@ -31,27 +31,26 @@ public class RendezVoServmpl implements RendezVoService {
     public RendezVousDTO createRendezVous(RendezVousDTO rendezVousDTO) {
         // Find patient and doctor
         Patient patient = patientRepository.findById(rendezVousDTO.getPatientId())
-            .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
-    
+                .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+
         Doctor doctor = doctorRepository.findById(rendezVousDTO.getDoctorId())
-            .orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
-    
+                .orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
+
         // Check if a RendezVous with the same date already exists
         boolean exists = rendezVousRepository.existsByDate(rendezVousDTO.getDate());
         if (exists) {
             throw new IllegalArgumentException("Impossible de créer RendezVous : la date existe déjà");
         }
-    
+
         // Create new RendezVous
         RendezVous rendezVous = new RendezVous();
         rendezVous.setDate(rendezVousDTO.getDate());
         rendezVous.setPatient(patient);
         rendezVous.setDoctor(doctor);
-    
+
         // Save and convert to DTO
         return convertToDto(rendezVousRepository.save(rendezVous));
     }
-    
 
     @Override
     public void deleteRendezVous(Integer rendezVousId) {
@@ -63,44 +62,59 @@ public class RendezVoServmpl implements RendezVoService {
 
     @Override
     public RendezVousDTO updateRendezVous(Integer rendezVousId, RendezVousDTO rendezVousDTO) {
+
         RendezVous existingRendezVous = rendezVousRepository.findById(rendezVousId)
-            .orElseThrow(() -> new EntityNotFoundException("RendezVous not found"));
+                .orElseThrow(() -> new EntityNotFoundException("RendezVous not found"));
+
+        if (rendezVousDTO.isStatut() != existingRendezVous.isStatus()) {
+            existingRendezVous.setStatus(rendezVousDTO.isStatut());
+            return convertToDto(rendezVousRepository.save(existingRendezVous));
+
+        } else {
+            boolean exists = rendezVousRepository.existsByDate(rendezVousDTO.getDate());
+            if (exists) {
+                throw new IllegalArgumentException("Impossible de modiifii RendezVous : la date existe déjà");
+            }
+
+            existingRendezVous.setDate(rendezVousDTO.getDate());
+            return convertToDto(rendezVousRepository.save(existingRendezVous));
+
+        }
 
         // Update other fields
-        existingRendezVous.setDate(rendezVousDTO.getDate());
-        existingRendezVous.setStatus(rendezVousDTO.isStatut());
 
         // Save and convert to DTO
-        return convertToDto(rendezVousRepository.save(existingRendezVous));
+
     }
 
     @Override
     public List<RendezVousDTO> getAllRendezVous() {
         return rendezVousRepository.findAll().stream()
-            .map(this::convertToDto)
-            .collect(Collectors.toList());
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<RendezVousDTO> getRendezVousByPatientId(Integer patId) {
         return rendezVousRepository.findByPatientId(patId).stream()
-            .map(this::convertToDto)
-            .collect(Collectors.toList());
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<RendezVousDTO> getRendezVousByDoctorId(Integer docId) {
         return rendezVousRepository.findByDoctorId(docId).stream()
-            .map(this::convertToDto)
-            .collect(Collectors.toList());
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     // Convert entity to DTO
     private RendezVousDTO convertToDto(RendezVous rendezVous) {
         RendezVousDTO dto = new RendezVousDTO();
-        dto.setDoctorName(rendezVous.getDoctor().getLastName()+" "+rendezVous.getDoctor().getFirstName());
-        dto.setPtienName(rendezVous.getPatient().getLastName()+" "+rendezVous.getPatient().getFirstName());
+        dto.setDoctorName(rendezVous.getDoctor().getLastName() + " " + rendezVous.getDoctor().getFirstName());
+        dto.setPtienName(rendezVous.getPatient().getLastName() + " " + rendezVous.getPatient().getFirstName());
         dto.setDate(rendezVous.getDate());
+        dto.setId(rendezVous.getId());
         dto.setPatientId(rendezVous.getPatient().getId());
         dto.setDoctorId(rendezVous.getDoctor().getId());
         dto.setStatut(rendezVous.isStatus());

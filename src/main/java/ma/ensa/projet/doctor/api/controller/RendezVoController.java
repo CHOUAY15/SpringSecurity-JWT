@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -69,13 +68,11 @@ public class RendezVoController {
     @PutMapping("/{id}")
     public ResponseEntity<RendezVousDTO> updateRendezVous(
             @PathVariable Integer id,
-            @Valid @RequestBody RendezVousDTO rendezVousDTO) {
-        try {
+             @RequestBody RendezVousDTO rendezVousDTO) {
+     
             RendezVousDTO updatedRendezVous = rendezVousService.updateRendezVous(id, rendezVousDTO);
             return new ResponseEntity<>(updatedRendezVous, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+       
     }
 
     @DeleteMapping("/{id}")

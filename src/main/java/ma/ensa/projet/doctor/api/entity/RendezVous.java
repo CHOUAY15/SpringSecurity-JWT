@@ -6,28 +6,27 @@ import java.util.Date;
 
 @Data
 @Entity
+@IdClass(RendezVousId.class)
 @Table(name = "rendezvous")
 public class RendezVous {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "doctor_id", nullable = false)
+    private Integer doctorId; 
 
-
-    @Temporal(TemporalType.TIMESTAMP)  
-    @Column(name = "date_rendezvous", nullable = false,unique = true)
+    @Id
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date_rendezvous", nullable = false)
     private Date date;
+
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", insertable = false, updatable = false)
+    private Doctor doctor;
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private Doctor doctor;
-
-    
-
     @Column(name = "status", nullable = false)
-    private boolean status=false;  
+    private boolean status = false;
 }

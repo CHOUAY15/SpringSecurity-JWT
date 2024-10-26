@@ -55,8 +55,7 @@ public class DoctorController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DoctorDto> update(
             @PathVariable Integer id,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
+            
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("specialty") String specialty,

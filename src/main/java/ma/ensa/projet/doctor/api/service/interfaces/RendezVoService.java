@@ -3,15 +3,15 @@ package ma.ensa.projet.doctor.api.service.interfaces;
 import java.util.List;
 
 import ma.ensa.projet.doctor.api.dto.RendezVousDTO;
-import ma.ensa.projet.doctor.api.entity.RendezVous;
+import ma.ensa.projet.doctor.api.entity.RendezVousId;
 
 public interface RendezVoService {
 
     RendezVousDTO createRendezVous(RendezVousDTO rendezVousDTO);
 
-    void deleteRendezVous(Integer rendezVousId);
+    void deleteRendezVous(RendezVousId rendezVousId);
 
-    RendezVousDTO updateRendezVous(Integer rendezVousId, RendezVousDTO rendezVousDTO);
+    RendezVousDTO updateRendezVous(RendezVousId rendezVousId, RendezVousDTO rendezVousDTO);
 
     List<RendezVousDTO> getAllRendezVous();
 

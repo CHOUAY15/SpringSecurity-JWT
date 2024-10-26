@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService {
                     .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
             DoctorDto doctorDto = new DoctorDto();
+            doctorDto.setImage(doctor.getImage());
             doctorDto.setId(doctor.getId());
             doctorDto.setFirstName(doctor.getFirstName());
             doctorDto.setLastName(doctor.getLastName());

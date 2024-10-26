@@ -1,18 +1,21 @@
 package ma.ensa.projet.doctor.api.controller;
 
 import ma.ensa.projet.doctor.api.dto.RendezVousDTO;
+import ma.ensa.projet.doctor.api.entity.RendezVousId; // Import the composite key
 import ma.ensa.projet.doctor.api.service.interfaces.RendezVoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Date;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/rendv")
-
 public class RendezVoController {
 
     @Autowired
@@ -23,8 +26,6 @@ public class RendezVoController {
         RendezVousDTO newRendezVous = rendezVousService.createRendezVous(rendezVousDTO);
         return new ResponseEntity<>(newRendezVous, HttpStatus.CREATED);
     }
-    
-
 
     @GetMapping
     public ResponseEntity<List<RendezVousDTO>> getAllRendezVous() {
@@ -65,23 +66,34 @@ public class RendezVoController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<RendezVousDTO> updateRendezVous(
-            @PathVariable Integer id,
-             @RequestBody RendezVousDTO rendezVousDTO) {
-     
-            RendezVousDTO updatedRendezVous = rendezVousService.updateRendezVous(id, rendezVousDTO);
-            return new ResponseEntity<>(updatedRendezVous, HttpStatus.OK);
-       
+    @PutMapping("/{doctorId}/{date}")
+    public ResponseEntity<?> updateRendezVous(
+            @PathVariable Integer doctorId, 
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date date,
+            @Valid @RequestBody RendezVousDTO rendezVousDTO) {
+        try {
+            RendezVousId rendezVousId = new RendezVousId(doctorId, date);
+            RendezVousDTO updatedRendezVous = rendezVousService.updateRendezVous(rendezVousId, rendezVousDTO);
+            return ResponseEntity.ok(updatedRendezVous);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteRendezVous(@PathVariable Integer id) {
+    @DeleteMapping("/{doctorId}/{date}")
+    public ResponseEntity<?> deleteRendezVous(
+            @PathVariable Integer doctorId, 
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date date) {
         try {
-            rendezVousService.deleteRendezVous(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            RendezVousId rendezVousId = new RendezVousId(doctorId, date);
+            rendezVousService.deleteRendezVous(rendezVousId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }

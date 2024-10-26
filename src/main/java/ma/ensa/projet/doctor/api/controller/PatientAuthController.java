@@ -34,12 +34,10 @@ public class PatientAuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody PatientRegistrationDto patientDto) {
 
-        // Vérifier si l'email existe déjà
         if (userRepository.existsByEmail(patientDto.getEmail())) {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
 
-        // Créer un nouvel utilisateur
         UserEntity user = new UserEntity();
         user.setEmail(patientDto.getEmail());
         user.setPassword(passwordEncoder.encode(patientDto.getPassword()));
@@ -47,7 +45,6 @@ public class PatientAuthController {
 
         UserEntity savedUser = userRepository.save(user);
 
-        // Créer le profil du patient
         Patient patient = new Patient();
         patient.setFirstName(patientDto.getFirstName());
         patient.setLastName(patientDto.getLastName());

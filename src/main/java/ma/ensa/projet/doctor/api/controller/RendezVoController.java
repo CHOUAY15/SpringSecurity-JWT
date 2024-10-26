@@ -4,11 +4,10 @@ import ma.ensa.projet.doctor.api.dto.RendezVousDTO;
 import ma.ensa.projet.doctor.api.entity.RendezVousId; // Import the composite key
 import ma.ensa.projet.doctor.api.service.interfaces.RendezVoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Date;
+
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -68,24 +67,20 @@ public class RendezVoController {
 
     @PutMapping("/{doctorId}/{date}")
     public ResponseEntity<?> updateRendezVous(
-            @PathVariable Integer doctorId, 
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date date,
-            @Valid @RequestBody RendezVousDTO rendezVousDTO) {
-        try {
-            RendezVousId rendezVousId = new RendezVousId(doctorId, date);
-            RendezVousDTO updatedRendezVous = rendezVousService.updateRendezVous(rendezVousId, rendezVousDTO);
+            @PathVariable Integer doctorId,
+            @PathVariable String date,
+            @RequestBody RendezVousDTO rendezVousDTO) {
+  
+          
+            RendezVousDTO updatedRendezVous = rendezVousService.updateRendezVous(doctorId,date, rendezVousDTO);
             return ResponseEntity.ok(updatedRendezVous);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        
     }
 
     @DeleteMapping("/{doctorId}/{date}")
     public ResponseEntity<?> deleteRendezVous(
             @PathVariable Integer doctorId, 
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date date) {
+            @PathVariable String date) {
         try {
             RendezVousId rendezVousId = new RendezVousId(doctorId, date);
             rendezVousService.deleteRendezVous(rendezVousId);

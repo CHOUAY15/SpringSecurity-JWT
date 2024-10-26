@@ -50,7 +50,7 @@ public class DoctorAuthController {
             return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
 
-        // Create new user
+      
         UserEntity user = new UserEntity();
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
@@ -58,7 +58,6 @@ public class DoctorAuthController {
         
         UserEntity savedUser = userRepository.save(user);
 
-        // Create doctor profile
         Doctor doctor = new Doctor();
         doctor.setFirstName(firstName);
         doctor.setLastName(lastName);
@@ -68,21 +67,14 @@ public class DoctorAuthController {
         doctor.setBiography(biography);
         doctor.setUser(savedUser);
 
-        // Handle image upload
-        if (image != null && !image.isEmpty()) {
+        if (!image.isEmpty()) {
             String fileName = fileStorageService.storeFile(image);
             doctor.setImage(fileName);
         }
 
         doctorRepository.save(doctor);
 
-        // // Authenticate the user and generate token
-        // Authentication authentication = authenticationManager.authenticate(
-        //     new UsernamePasswordAuthenticationToken(email, password)
-        // );
-
-        // SecurityContextHolder.getContext().setAuthentication(authentication);
-        // String token = jwtGenerator.generateToken(authentication);
+       
 
         return new ResponseEntity<>("Doctor has been registered", HttpStatus.CREATED);    }
 }

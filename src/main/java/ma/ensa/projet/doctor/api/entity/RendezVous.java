@@ -2,7 +2,6 @@ package ma.ensa.projet.doctor.api.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.util.Date;
 
 @Data
 @Entity
@@ -15,9 +14,8 @@ public class RendezVous {
     private Integer doctorId; 
 
     @Id
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_rendezvous", nullable = false)
-    private Date date;
+    private String date;
 
     @ManyToOne
     @JoinColumn(name = "doctor_id", insertable = false, updatable = false)

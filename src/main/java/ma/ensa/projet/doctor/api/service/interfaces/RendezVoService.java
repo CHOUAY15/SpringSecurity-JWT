@@ -11,7 +11,7 @@ public interface RendezVoService {
 
     void deleteRendezVous(RendezVousId rendezVousId);
 
-    RendezVousDTO updateRendezVous(RendezVousId rendezVousId, RendezVousDTO rendezVousDTO);
+    RendezVousDTO updateRendezVous(Integer doctorId,String date, RendezVousDTO rendezVousDTO);
 
     List<RendezVousDTO> getAllRendezVous();
 

@@ -4,7 +4,7 @@ import ma.ensa.projet.doctor.api.dto.RendezVousDTO;
 import ma.ensa.projet.doctor.api.entity.Doctor;
 import ma.ensa.projet.doctor.api.entity.Patient;
 import ma.ensa.projet.doctor.api.entity.RendezVous;
-import ma.ensa.projet.doctor.api.entity.RendezVousId; 
+import ma.ensa.projet.doctor.api.entity.RendezVousId;
 import ma.ensa.projet.doctor.api.repository.DoctorRepo;
 import ma.ensa.projet.doctor.api.repository.PatientRepo;
 import ma.ensa.projet.doctor.api.repository.RendezVoRepos;
@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,9 +38,16 @@ public class RendezVoServmpl implements RendezVoService {
         Doctor doctor = doctorRepository.findById(rendezVousDTO.getDoctorId())
                 .orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
 
-        // Set the doctorId explicitly since it's part of the composite key
+        boolean rendezVousExists = rendezVousRepository.existsByDoctorIdAndDate(
+                rendezVousDTO.getDoctorId(),
+                rendezVousDTO.getDate());
+
+        if (rendezVousExists) {
+            throw new IllegalArgumentException("Cette date de rendez-vous est déjà réservée.");
+        }
+
         RendezVous rendezVous = new RendezVous();
-        rendezVous.setDoctorId(doctor.getId()); // Add this line
+        rendezVous.setDoctorId(doctor.getId()); 
         rendezVous.setDoctor(doctor);
         rendezVous.setPatient(patient);
         rendezVous.setDate(rendezVousDTO.getDate());
@@ -47,35 +56,46 @@ public class RendezVoServmpl implements RendezVoService {
         return convertToDto(rendezVousRepository.save(rendezVous));
     }
 
-
     @Override
-    public void deleteRendezVous(RendezVousId rendezVousId) { // Change parameter to composite key type
+    public void deleteRendezVous(RendezVousId rendezVousId) { 
         if (!rendezVousRepository.existsById(rendezVousId)) {
             throw new EntityNotFoundException("RendezVous not found");
         }
         rendezVousRepository.deleteById(rendezVousId);
     }
 
+    @Transactional
     @Override
-    public RendezVousDTO updateRendezVous(RendezVousId rendezVousId, RendezVousDTO rendezVousDTO) {
-        RendezVous existingRendezVous = rendezVousRepository.findById(rendezVousId)
+    public RendezVousDTO updateRendezVous(Integer doctorId, String date, RendezVousDTO rendezVousDTO) {
+        RendezVous existingRendezVous = rendezVousRepository.findById(new RendezVousId(doctorId, date))
                 .orElseThrow(() -> new EntityNotFoundException("RendezVous not found"));
-
-        // Don't modify doctorId as it's part of the primary key
-        if (!rendezVousDTO.getPatientId().equals(existingRendezVous.getPatient().getId())) {
-            Patient newPatient = patientRepository.findById(rendezVousDTO.getPatientId())
-                    .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
-            existingRendezVous.setPatient(newPatient);
-        }
-
-        existingRendezVous.setStatus(rendezVousDTO.isStatut());
-        
-        // Date is part of the primary key, so it shouldn't be modified
-        // Remove the date modification logic
-
-        return convertToDto(rendezVousRepository.save(existingRendezVous));
-    }
     
+        if (rendezVousDTO.isStatut() != existingRendezVous.isStatus()) {
+            existingRendezVous.setStatus(rendezVousDTO.isStatut());
+            return convertToDto(rendezVousRepository.save(existingRendezVous));
+        }
+    
+        if (!date.equals(rendezVousDTO.getDate())) {
+            boolean exists = rendezVousRepository.existsByDoctorIdAndDate(doctorId, rendezVousDTO.getDate());
+            if (exists) {
+                throw new IllegalArgumentException("Un rendez-vous existe déjà à cette date");
+            }
+    
+            RendezVous newRendezVous = new RendezVous();
+            newRendezVous.setDoctorId(doctorId);
+            newRendezVous.setDate(rendezVousDTO.getDate());
+            newRendezVous.setPatient(existingRendezVous.getPatient());
+            newRendezVous.setStatus(existingRendezVous.isStatus());
+            newRendezVous.setDoctor(existingRendezVous.getDoctor());
+    
+            rendezVousRepository.delete(existingRendezVous);
+            
+            return convertToDto(rendezVousRepository.save(newRendezVous));
+        }
+    
+        return convertToDto(existingRendezVous);
+    }
+
     @Override
     public List<RendezVousDTO> getAllRendezVous() {
         return rendezVousRepository.findAll().stream()
@@ -97,7 +117,6 @@ public class RendezVoServmpl implements RendezVoService {
                 .collect(Collectors.toList());
     }
 
-    // Convert entity to DTO
     private RendezVousDTO convertToDto(RendezVous rendezVous) {
         RendezVousDTO dto = new RendezVousDTO();
         dto.setDoctorName(rendezVous.getDoctor().getLastName() + " " + rendezVous.getDoctor().getFirstName());

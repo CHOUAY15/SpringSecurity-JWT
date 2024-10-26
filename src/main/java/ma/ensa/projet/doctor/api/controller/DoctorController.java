@@ -65,13 +65,11 @@ public class DoctorController {
             @RequestParam("biography") String biography) {
 
         try {
-            // Find the existing doctor by ID
             Doctor existingDoctor = doctorService.findById(id)
                     .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + id));
 
-            // Update fields
             DoctorDto doctorDto = new DoctorDto();
-            doctorDto.setId(id); // Set the ID to update
+            doctorDto.setId(id); 
             doctorDto.setFirstName(firstName);
             doctorDto.setLastName(lastName);
             doctorDto.setSpecialty(specialty);
@@ -82,16 +80,13 @@ public class DoctorController {
       
 
             if (image != null && !image.isEmpty()) {
-                // Delete old image if exists
                 if (existingDoctor.getImage() != null) {
                     fileStorageService.deleteFile(existingDoctor.getImage());
                 }
-                // Store new image
                 String fileName = fileStorageService.storeFile(image);
                 doctorDto.setImage(fileName);
             }
 
-            // Update the doctor using the service
             DoctorDto updatedDoctorDto = userService.updateDoctor(id, doctorDto);
 
             return new ResponseEntity<>(updatedDoctorDto, HttpStatus.OK);

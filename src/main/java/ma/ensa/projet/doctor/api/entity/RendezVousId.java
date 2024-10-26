@@ -1,7 +1,6 @@
 package ma.ensa.projet.doctor.api.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RendezVousId implements Serializable {
     private Integer doctorId;
-    private Date date;
+    private String date;
 
    
 }

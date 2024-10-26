@@ -17,4 +17,6 @@ public interface UserService {
     AuthResponseDTO buildAuthResponse(String token, PersonDto personDto,Integer role);
     PatientDto updatePatient(Integer id,PatientDto patientDto);
     DoctorDto updateDoctor(Integer id,DoctorDto patientDto);
+    void initiatePasswordReset(String email);
+    void confirmPasswordReset(String email, String token, String newPassword);
 }

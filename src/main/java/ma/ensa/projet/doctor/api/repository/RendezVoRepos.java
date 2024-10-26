@@ -18,8 +18,8 @@ public interface RendezVoRepos extends JpaRepository<RendezVous, RendezVousId> {
     
     List<RendezVous> findByPatientId(Integer patientId);
     List<RendezVous> findByDoctorId(Integer doctorId);
-    boolean existsByDate(Date date);
-    boolean existsByDoctorIdAndDate(Integer doctorId, Date date);
+    boolean existsByDate(String date);
+    boolean existsByDoctorIdAndDate(Integer doctorId, String date);
 
 
     

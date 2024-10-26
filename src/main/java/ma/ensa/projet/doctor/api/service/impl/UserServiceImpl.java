@@ -12,12 +12,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import ma.ensa.projet.doctor.api.dto.AuthResponseDTO;
 import ma.ensa.projet.doctor.api.dto.DoctorDto;
 import ma.ensa.projet.doctor.api.dto.LoginDto;
 import ma.ensa.projet.doctor.api.dto.PatientDto;
+import ma.ensa.projet.doctor.api.dto.PatientRegistrationDto;
 import ma.ensa.projet.doctor.api.dto.PersonDto;
 import ma.ensa.projet.doctor.api.entity.Doctor;
 import ma.ensa.projet.doctor.api.entity.PasswordResetToken;
@@ -46,6 +48,8 @@ public class UserServiceImpl implements UserService {
     private PatientRepo patientRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private FileStorageService fileStorageService;
     
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
@@ -219,6 +223,65 @@ public class UserServiceImpl implements UserService {
         
         resetToken.setUsed(true);
         tokenRepository.save(resetToken);
+    }
+
+    @Transactional
+    @Override
+    public UserEntity registerDoctor(String email, String password, String firstName, String lastName,
+                                     String specialty, MultipartFile image, String address,
+                                     int yearsExperience, String biography) {
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email is already taken!");
+        }
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(1); // 1 for Doctor role
+
+        UserEntity savedUser = userRepository.save(user);
+
+        Doctor doctor = new Doctor();
+        doctor.setFirstName(firstName);
+        doctor.setLastName(lastName);
+        doctor.setSpecialty(specialty);
+        doctor.setAddress(address);
+        doctor.setYearsExperience(yearsExperience);
+        doctor.setBiography(biography);
+        doctor.setUser(savedUser);
+
+        if (image != null && !image.isEmpty()) {
+            String fileName = fileStorageService.storeFile(image);
+            doctor.setImage(fileName);
+        }
+
+        doctorRepository.save(doctor);
+
+        return savedUser;
+    }
+
+    @Override
+    public UserEntity registerPatient(PatientRegistrationDto patientDto) {
+        if (userRepository.existsByEmail(patientDto.getEmail())) {
+            throw new RuntimeException("Email is already taken!");
+        }
+
+        UserEntity user = new UserEntity();
+        user.setEmail(patientDto.getEmail());
+        user.setPassword(passwordEncoder.encode(patientDto.getPassword()));
+        user.setRole(0); // 0 for Patient role
+
+        UserEntity savedUser = userRepository.save(user);
+
+        Patient patient = new Patient();
+        patient.setFirstName(patientDto.getFirstName());
+        patient.setLastName(patientDto.getLastName());
+        patient.setPhoneNumber(patientDto.getPhoneNumber());
+        patient.setUser(savedUser);
+
+        patientRepository.save(patient);
+
+        return savedUser;
     }
     
 }
